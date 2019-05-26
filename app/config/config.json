@@ -1,0 +1,24 @@
+{
+    "database": {
+        "driver": "mysql",
+        "host": "localhost",
+        "port": null,
+        "database": "listing",
+        "username": "root",
+        "password": ""
+    },
+
+    "google": {
+        "apikey": null,
+        "spreadsheetId": null
+    },
+
+    "listennotes": {
+        "apikey": "988e6285bcf64a9aa17d1d421d0df70b"
+    },
+
+    "security": {
+        "path": "/",
+        "login": "/login"
+    }
+}
