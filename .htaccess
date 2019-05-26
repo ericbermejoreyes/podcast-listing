@@ -1,7 +1,0 @@
-Options +FollowSymLinks
-RewriteEngine On
-
-RewriteCond %{REQUEST_URI} asset [NC]
-RewriteRule asset/(.*)$ public/asset/$1 [L]
-
-RewriteRule ^.*$ index.php [QSA,L]
