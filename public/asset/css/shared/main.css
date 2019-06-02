@@ -1,0 +1,15 @@
+form#podcast-listing {
+    margin-bottom: 0px;
+}
+
+table#tbl-podcasts tbody{
+    font-size: 14px;
+}
+
+table#tbl-podcasts tbody tr td:last-child{
+    width: 50%;
+}
+
+.highlight {
+    background-color: #062c33;
+}

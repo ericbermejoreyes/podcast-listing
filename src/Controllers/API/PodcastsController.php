@@ -9,18 +9,17 @@ class PodcastsController
 {
     public function getPodcasts(Request $request)
     {
-        $module = new Podcasts();
+        $podcastModule = new Podcasts();
 
-        $filters = [];
+        $filters = $request->request->all();
 
-        foreach($module::FIELDS as $field)
-        {
-            if (($value = $request->request->get($field)) !== null) {
-                $filters[$field] = $value;
-            }
+        $iterator = $podcastModule->search($filters);
+
+        $podcasts = [];
+
+        while ($podcast = $iterator->fetch(\PDO::FETCH_ASSOC)) {
+            $podcasts[] = $podcast;
         }
-
-        $podcasts = $module->findPodcasts($filters);
 
         $response = new JsonResponse($podcasts);
 
@@ -30,13 +29,13 @@ class PodcastsController
     public function putPodcasts(Request $request)
     {
         $podcasts = $request->query->get('podcasts');
-        $module = new Podcasts();
+        $podcastModule = new Podcasts();
 
         foreach ($podcasts as $podcast) {
-            if ($module->podcastExists($podcast['tokenId'])) {
-                $module->updatePodcast($podcast['tokenId'], $podcast);
+            if ($podcastModule->exists($podcast['tokenId'])) {
+                $podcastModule->update($podcast['tokenId'], $podcast);
             } else {
-                $module->addPodcast($podcast);
+                $podcastModule->add($podcast);
             }
         }
 

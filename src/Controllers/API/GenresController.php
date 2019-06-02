@@ -10,18 +10,11 @@ class GenresController extends Controller
 {
     public function getGenres(Request $request)
     {
-        $module = new Genres();
+        $genreModule = new Genres();
 
-        $filters = [];
+        $filters = $request->request->all();
 
-        foreach($module::FIELDS as $field)
-        {
-            if (($value = $request->request->get($field)) !== null) {
-                $filters[$field] = $value;
-            }
-        }
-
-        $genres = $module->findGenres($filters);
+        $genres = $genreModule->find($filters);
 
         $response = new JsonResponse($genres);
 
@@ -31,13 +24,13 @@ class GenresController extends Controller
     public function putGenres(Request $request)
     {
         $genres = $request->query->get('genres');
-        $module = new Genres();
+        $genreModule = new Genres();
 
         foreach ($genres as $genre) {
-            if ($module->genreExists($genre['tokenId'])) {
-                $module->updateGenre($genre['tokenId'], $genre);
+            if ($genreModule->exists($genre['tokenId'])) {
+                $genreModule->update($genre['tokenId'], $genre);
             } else {
-                $module->addGenre($genre);
+                $genreModule->add($genre);
             }
         }
 

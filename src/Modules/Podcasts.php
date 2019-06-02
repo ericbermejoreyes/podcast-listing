@@ -3,10 +3,9 @@ namespace Modules;
 
 class Podcasts extends Module
 {
-    const FIELDS = [
+    protected $fields = [
         'id',
         'tokenId',
-        'genreId',
         'host',
         'title',
         'email',
@@ -16,59 +15,110 @@ class Podcasts extends Module
         'updated'
     ];
 
-    public function findPodcasts(array $filters = null)
-    {
-        $query = $this->createQuery('p');
+    private $genres;
 
-        $query->select();
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->genres = new GenresPodcasts();
+    }
+
+    public function search(array $filters)
+    {
+        $parameters = [];
+
+        $query = $this->createQuery('p');
+        $query
+            ->select('DISTINCT p.*')
+            ->join('genres_podcasts', 'gp', 'p.id = gp.podcastId');
 
         foreach ($filters as $key => $value) {
-            $query->addWhere('p.' . $key . ' = :' .$key);
+            if (in_array($key, $this->fields, true) && !empty($value)) {
+                $query->addWhere("p.$key = :$key");
+                $parameters[$key] = $value;
+            }
+        }
+
+        if (isset($filters['genreId']))
+        {
+            $query->addWhere("gp.genreId = :genreId");
+            $parameters['genreId'] = $filters['genreId'];
+        }
+
+        if (isset($filters['search'])) {
+            $ors[] = "p.host LIKE :search";
+            $ors[] = "p.title LIKE :search";
+            $ors[] = "p.email LIKE :search";
+            $ors[] = "p.description LIKE :search";
+            $ors[] = "p.note LIKE :search";
+
+            $query->addWhere('(' . implode(' OR ', $ors) . ')');
+
+            $parameters['search'] = "%" . $filters['search'] . "%";
+        }
+
+        if (isset($filters['page'])) {
+            $query->paginate($filters['page']);
+        } else {
+            $query->paginate();
         }
 
         if ($filters !== null) {
-            $query->setParameters($filters);
+            $query->setParameters($parameters);
         }
 
-        $stmt = $query->execute();
-
-        $podcasts = [];
-
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $podcasts[] = $row;
-        }
-
-        return [
-            'total' => count($podcasts),
-            'podcasts' => $podcasts
-        ];
+        return $query->getIterator();
     }
 
-    public function addPodcast(array $data)
+    public function add(array $data)
     {
         $query = $this->createQuery();
 
+        $fields = [];
+
+        foreach ($this->fields as $field) {
+            if (in_array($field, array_keys($data), true)) {
+                $fields[$field] = $data[$field];
+            }
+        }
+
         $query
-            ->insert($data)
+            ->insert($fields)
             ->execute();
+
+
+        $this->genres->add(['genreId' => $data['genreId'], 'podcastId' => $query->lastId()]);
 
         return $this;
     }
 
-    public function updatePodcast($tokenId, array $data)
+    public function update($tokenId, array $data)
     {
         $query = $this->createQuery();
 
+        $podcastId = $this->findOne(['tokenId' => $tokenId])['id'];
+
+        $fields = [];
+
+        foreach ($this->fields as $field) {
+            if (in_array($field, array_keys($data), true)) {
+                $fields[$field] = $data[$field];
+            }
+        }
+
         $query
-            ->update($data)
+            ->update($fields)
             ->where('tokenId = :tokenId')
             ->setParameter('tokenId', $tokenId)
             ->execute();
 
+        $this->genres->add(['genreId' => $data['genreId'], 'podcastId' => $podcastId]);
+
         return $this;
     }
 
-    public function podcastExists($tokenId)
+    public function exists($tokenId)
     {
         $query = $this->createQuery('p');
 

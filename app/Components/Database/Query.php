@@ -19,6 +19,9 @@ class Query
     private $insert;
     private $delete;
     private $update;
+    private $paginate;
+    private $join;
+    private $count = false;
 
     public function __construct($table, $alias, $db)
     {
@@ -37,7 +40,7 @@ class Query
     public function insert(array $values)
     {
         $this->insert = array_map(function ($value) {
-            return '\'' . addslashes($value) . '\'';
+            return '\'' . addslashes(strip_tags($value)) . '\'';
         }, $values);
         return $this;
     }
@@ -45,7 +48,7 @@ class Query
     public function update(array $values)
     {
         foreach ($values as $key => $value) {
-            $this->update[] = $key . ' = ' . '\'' . addslashes($value) . '\'';
+            $this->update[] = $key . ' = ' . '\'' . addslashes(strip_tags($value)) . '\'';
         }
         return $this;
     }
@@ -68,7 +71,7 @@ class Query
         return $this;
     }
 
-    public function getQueryString()
+    public function getSql()
     {
         if (!empty($this->select)) {
             $this
@@ -76,6 +79,10 @@ class Query
                 ->appendQuery(self::SELECT)
                 ->appendQuery($this->select)
                 ->appendQuery('FROM ' . $this->tableAs);
+
+            if ($this->join !== null) {
+                $this->appendQuery(implode(' ', $this->join));
+            }
 
             if (!empty($this->wheres)) {
                 $this->appendQuery($this->getWheres());
@@ -105,6 +112,14 @@ class Query
                 ->appendQuery($this->getWheres());
         }
 
+        if ($this->paginate !== null) {
+            $this->appendQuery($this->paginate);
+        }
+
+        if ($this->count === true) {
+            return 'SELECT COUNT(*) FROM (' . implode(' ', $this->query) . ') AS count';
+        }
+
         return implode(' ', $this->query);
     }
 
@@ -131,9 +146,41 @@ class Query
         return $this;
     }
 
+    public function join($table, $alias, $on)
+    {
+        $this->join[] = "JOIN $table AS $alias";
+        $this->join[] = "ON $on";
+
+        return $this;
+    }
+
+    public function leftJoin($table, $alias, $on)
+    {
+        $this->join[] = "LEFT JOIN $table AS $alias";
+        $this->join[] = "ON $on";
+
+        return $this;
+    }
+
+    public function rightJoin($table, $alias, $on)
+    {
+        $this->join[] = "RIGHT JOIN $table AS $alias";
+        $this->join[] = "ON $on";
+
+        return $this;
+    }
+
+    public function innerJoin($table, $alias, $on)
+    {
+        $this->join[] = "INNER JOIN $table AS $alias";
+        $this->join[] = "ON $on";
+
+        return $this;
+    }
+
     public function execute()
     {
-        $statement = $this->db->connection->prepare($this->getQueryString());
+        $statement = $this->db->connection->prepare($this->getSql());
 
         if (!empty($this->parameters)) {
             $statement->execute($this->parameters);
@@ -142,6 +189,51 @@ class Query
         }
 
         return $statement;
+    }
+
+    public function count()
+    {
+        $this->count = true;
+
+        return $this;
+    }
+
+    public function paginate($page = 1, $maxResult = 20)
+    {
+        $page = $page < 0 ? 0 : $page - 1;
+        $this->paginate = sprintf('LIMIT %d OFFSET %d', $maxResult, ($maxResult * $page));
+
+        return $this;
+    }
+
+    public function getResult()
+    {
+        $stmt = $this->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    public function getOneOrNullResult()
+    {
+        $stmt = $this->execute();
+
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return empty($result) ? null : $result;
+    }
+
+    public function getIterator()
+    {
+        return $this->execute();
+    }
+
+    public function lastId()
+    {
+        if ($this->insert === null) {
+            return null;
+        }
+
+        return $this->db->connection->lastInsertId();
     }
 
     private function getWheres()

@@ -3,42 +3,14 @@ namespace Modules;
 
 class Genres extends Module
 {
-    const FIELDS = [
+    protected $fields = [
        'id',
        'tokenId',
        'name',
        'created'
     ];
 
-    public function findGenres(array $filters = null)
-    {
-        $query = $this->createQuery('g');
-
-        $query->select();
-
-        foreach ($filters as $key => $value) {
-            $query->addWhere('g.' . $key . ' = :' .$key);
-        }
-
-        if ($filters !== null) {
-            $query->setParameters($filters);
-        }
-
-        $stmt = $query->execute();
-
-        $genres = [];
-
-        while ($row = $stmt->fetch(\PDO::FETCH_ASSOC)) {
-            $genres[] = $row;
-        }
-
-        return [
-            'total' => count($genres),
-            'genres' => $genres
-        ];
-    }
-
-    public function addGenre(array $data)
+    public function add(array $data)
     {
         $query = $this->createQuery();
 
@@ -49,7 +21,7 @@ class Genres extends Module
         return $this;
     }
 
-    public function updateGenre($tokenId, array $data)
+    public function update($tokenId, array $data)
     {
         $query = $this->createQuery();
 
@@ -62,7 +34,7 @@ class Genres extends Module
         return $this;
     }
 
-    public function genreExists($tokenId)
+    public function exists($tokenId)
     {
         $query = $this->createQuery('g');
 
