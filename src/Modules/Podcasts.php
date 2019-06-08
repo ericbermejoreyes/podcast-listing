@@ -12,7 +12,8 @@ class Podcasts extends Module
         'description',
         'note',
         'created',
-        'updated'
+        'updated',
+        'starred'
     ];
 
     private $genres;
@@ -113,7 +114,9 @@ class Podcasts extends Module
             ->setParameter('tokenId', $tokenId)
             ->execute();
 
-        $this->genres->add(['genreId' => $data['genreId'], 'podcastId' => $podcastId]);
+        if (isset($data['genreId'])) {
+            $this->genres->add(['genreId' => $data['genreId'], 'podcastId' => $podcastId]);
+        }
 
         return $this;
     }

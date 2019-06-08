@@ -28,5 +28,11 @@
     "method": "put",
     "control": "API\\PodcastsController",
     "action": "putPodcasts"
+  },
+  {
+    "path": "/api/podcasts/:tokenId",
+    "method": "put",
+    "control": "API\\PodcastsController",
+    "action": "putPodcast"
   }
 ]

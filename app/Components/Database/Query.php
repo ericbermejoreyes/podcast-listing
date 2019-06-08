@@ -40,7 +40,7 @@ class Query
     public function insert(array $values)
     {
         $this->insert = array_map(function ($value) {
-            return '\'' . addslashes(strip_tags($value)) . '\'';
+            return '\'' . addslashes($value) . '\'';
         }, $values);
         return $this;
     }
@@ -48,7 +48,7 @@ class Query
     public function update(array $values)
     {
         foreach ($values as $key => $value) {
-            $this->update[] = $key . ' = ' . '\'' . addslashes(strip_tags($value)) . '\'';
+            $this->update[] = $key . ' = ' . '\'' . addslashes($value) . '\'';
         }
         return $this;
     }

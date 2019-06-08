@@ -28,7 +28,7 @@ class PodcastsController
 
     public function putPodcasts(Request $request)
     {
-        $podcasts = $request->query->get('podcasts');
+        $podcasts = $request->get('podcasts');
         $podcastModule = new Podcasts();
 
         foreach ($podcasts as $podcast) {
@@ -37,6 +37,26 @@ class PodcastsController
             } else {
                 $podcastModule->add($podcast);
             }
+        }
+
+        $response = new JsonResponse([
+            'result' => 'ok'
+        ]);
+
+        return $response;
+    }
+
+    public function putPodcast(Request $request)
+    {
+        $podcast = $request->get('podcast');
+        $podcast['tokenId'] = $request->get('tokenId');
+
+        $podcastModule = new Podcasts();
+
+        if ($podcastModule->exists($podcast['tokenId'])) {
+            $podcastModule->update($podcast['tokenId'], $podcast);
+        } else {
+            $podcastModule->add($podcast);
         }
 
         $response = new JsonResponse([

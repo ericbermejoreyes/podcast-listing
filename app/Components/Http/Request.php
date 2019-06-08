@@ -49,4 +49,21 @@ class Request
     {
         return $this->headers;
     }
+
+    public function get($key)
+    {
+        if ($this->request->get($key) !== null) {
+            return $this->request->get($key);
+        }
+
+        if ($this->query->get($key) !== null) {
+            return $this->query->get($key);
+        }
+
+        if ($this->attributes->get($key) !== null) {
+            return $this->attributes->get($key);
+        }
+
+        return null;
+    }
 }

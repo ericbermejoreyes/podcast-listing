@@ -6,10 +6,36 @@ table#tbl-podcasts tbody{
     font-size: 14px;
 }
 
-table#tbl-podcasts tbody tr td:last-child{
-    width: 50%;
+table#tbl-podcasts tbody .fa-star {
+    color: #ffc107 !important;
+}
+
+table#tbl-podcasts .fa {
+    font-size: 18px !important;
+    color: #95999c;
+}
+
+table#tbl-podcasts tr td:nth-last-child(2) {
+    min-width: 500px;
 }
 
 .highlight {
-    background-color: #062c33;
+    background-color: #abdde5;
+}
+
+.spinner {
+    width: 50px;
+}
+
+.note {
+    cursor: text;
+}
+
+.processing {
+    background: #343A40;
+    border-radius: 4px;
+    position: absolute;
+    right: 2em;
+    bottom: 1em;
+    z-index: 1000;
 }
