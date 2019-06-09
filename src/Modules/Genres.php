@@ -10,6 +10,28 @@ class Genres extends Module
        'created'
     ];
 
+    public function getOrderedList(array $filters)
+    {
+        $query = $this->createQuery('g');
+        $parameters = [];
+
+        $query
+            ->select();
+
+        foreach ($filters as $field => $value) {
+            if (in_array($field, $this->fields, true)) {
+                $query->addWhere("g.$field = :$field");
+                $parameters[$field] = $value;
+            }
+        }
+
+        $query
+            ->setParameters($parameters)
+            ->orderBy('g.name');
+
+        return $query->getIterator();
+    }
+
     public function add(array $data)
     {
         $query = $this->createQuery();

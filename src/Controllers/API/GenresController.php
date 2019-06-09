@@ -14,7 +14,12 @@ class GenresController extends Controller
 
         $filters = $request->request->all();
 
-        $genres = $genreModule->find($filters);
+        $iterator = $genreModule->getOrderedList($filters);
+        $genres = [];
+
+        while ($genre = $iterator->fetch(\PDO::FETCH_ASSOC)) {
+            $genres[] = $genre;
+        }
 
         $response = new JsonResponse($genres);
 

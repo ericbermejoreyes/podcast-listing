@@ -8,6 +8,9 @@ class Query
     const UPDATE = 'UPDATE';
     const DELETE = 'DELETE FROM';
 
+    const SORT_DESC = 'DESC';
+    const SORT_ASC = 'ASC';
+
     private $db;
     private $query;
     private $parameters;
@@ -22,6 +25,7 @@ class Query
     private $paginate;
     private $join;
     private $count = false;
+    private $order;
 
     public function __construct($table, $alias, $db)
     {
@@ -86,6 +90,10 @@ class Query
 
             if (!empty($this->wheres)) {
                 $this->appendQuery($this->getWheres());
+            }
+
+            if ($this->order !== null) {
+                $this->appendQuery('ORDER BY ' . implode(' ,', $this->order));
             }
         } else if (!empty($this->insert)) {
             $this
@@ -175,6 +183,18 @@ class Query
         $this->join[] = "INNER JOIN $table AS $alias";
         $this->join[] = "ON $on";
 
+        return $this;
+    }
+
+    public function orderBy($column, $order = self::SORT_ASC)
+    {
+        $this->order = ["$column $order"];
+        return $this;
+    }
+
+    public function addOrderBy($column, $order = self::SORT_ASC)
+    {
+        $this->order[] = "$column $order";
         return $this;
     }
 

@@ -50,7 +50,7 @@
                         <th scope="col"></th>
                     </tr>
                     </thead>
-                    <tbody class="bg-light"></tbody>
+                    <tbody></tbody>
                 </table>
             </section>
             <span class="processing" style="display: none;">
