@@ -42,4 +42,4 @@ lapi = (function (...args) {
     }
 
     return api;
-}(lapiKey));
+}(LAPIKEY));

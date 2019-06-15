@@ -9,8 +9,8 @@
     },
 
     "google": {
-        "apikey": null,
-        "spreadsheetId": null
+        "clientId": "1016115252875-8cua8u739t260q2j5n3n5m679usup6go.apps.googleusercontent.com",
+        "apikey": "AIzaSyDBaeq5aeWtOsoteK3TDmGBJrIpCk3ZEsY"
     },
 
     "listennotes": {

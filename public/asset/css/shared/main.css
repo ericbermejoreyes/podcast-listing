@@ -1,3 +1,7 @@
+* {
+    box-sizing: border-box;
+}
+
 form#podcast-listing {
     margin-bottom: 0px;
 }
@@ -19,6 +23,15 @@ table#tbl-podcasts tr td:nth-last-child(2) {
     min-width: 500px;
 }
 
+#toast-notifications {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 10000;
+    width: 300px;
+    padding: 1em;
+}
+
 .highlight {
     background-color: #abdde5;
 }
@@ -38,4 +51,14 @@ table#tbl-podcasts tr td:nth-last-child(2) {
     right: 2em;
     bottom: 1em;
     z-index: 1000;
+}
+
+.col-left {
+    width: 350px;
+    float:left;
+}
+
+.col-right {
+    width: calc(100% - 350px);
+    float: left;
 }

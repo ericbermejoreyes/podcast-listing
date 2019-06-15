@@ -29,6 +29,13 @@ class PodcastsController
     public function putPodcasts(Request $request)
     {
         $podcasts = $request->get('podcasts');
+
+        if ($podcasts === null) {
+            return new JsonResponse([
+                'error' => 'podcasts data not found in request'
+            ], 400);
+        }
+
         $podcastModule = new Podcasts();
 
         foreach ($podcasts as $podcast) {
@@ -49,6 +56,13 @@ class PodcastsController
     public function putPodcast(Request $request)
     {
         $podcast = $request->get('podcast');
+
+        if ($podcast === null) {
+            return new JsonResponse([
+                'error' => 'podcast data not found in request'
+            ], 400);
+        }
+
         $podcast['tokenId'] = $request->get('tokenId');
 
         $podcastModule = new Podcasts();

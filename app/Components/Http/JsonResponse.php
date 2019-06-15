@@ -3,9 +3,9 @@ namespace Components\Http;
 
 class JsonResponse extends Response
 {
-    public function __construct(array $content = null)
+    public function __construct(array $content = null, $responseCode = 200)
     {
-        parent::__construct();
+        parent::__construct(null, $responseCode);
 
         if ($content !== null) {
             $this->setContent($content);

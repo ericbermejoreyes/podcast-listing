@@ -28,8 +28,14 @@ class GenresController extends Controller
 
     public function putGenres(Request $request)
     {
-        $genres = $request->query->get('genres');
+        $genres = $request->get('genres');
         $genreModule = new Genres();
+
+        if ($genres == null) {
+            return new JsonResponse([
+                "error" => "genres data not found in request"
+            ], 400);
+        }
 
         foreach ($genres as $genre) {
             if ($genreModule->exists($genre['tokenId'])) {
@@ -39,7 +45,9 @@ class GenresController extends Controller
             }
         }
 
-        $response = new JsonResponse();
+        $response = new JsonResponse([
+            'result' => 'ok'
+        ]);
 
         return $response;
     }

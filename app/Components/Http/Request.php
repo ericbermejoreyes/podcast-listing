@@ -26,7 +26,7 @@ class Request
         $parsedContent = [];
 
         if (!empty($content)) {
-            if (!($parsedContent = json_decode($content, true))) {
+            if (($parsedContent = json_decode($content, true)) === null) {
                 parse_str($content, $parsedContent);
             }
         }

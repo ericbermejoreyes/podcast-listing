@@ -8,11 +8,13 @@ class Response
     const PATH_TO_VIEW = ROOT_DIR . '/public/views';
 
     protected $content;
+    protected $responseCode;
 
     public $headers;
 
-    public function __construct($content = null)
+    public function __construct($content = null, $responseCode = 200)
     {
+        $this->responseCode = $responseCode;
         if ($content !== null) {
             $this->setContent($content);
         }
@@ -43,6 +45,8 @@ class Response
 
     private function setHeaders()
     {
+        http_response_code($this->responseCode);
+
         foreach ($this->headers->all() as $name => $value) {
             header(implode(': ', [$name, $value]));
         }
