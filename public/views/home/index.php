@@ -9,10 +9,11 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Podcast Listing</title>
-    <link rel="stylesheet" href="asset/css/shared/bootstrap.min.css">
-    <link rel="stylesheet" href="asset/css/shared/main.css">
-    <link rel="stylesheet" href="asset/css/shared/font-awesome.min.css">
+    <title>App</title>
+    <link rel="shortcut icon" href="./asset/img/favicon.ico">
+    <link rel="stylesheet" href="./asset/css/shared/bootstrap.min.css">
+    <link rel="stylesheet" href="./asset/css/shared/main.css">
+    <link rel="stylesheet" href="./asset/css/shared/font-awesome.min.css">
 </head>
 <body>
     <div class="row position-absolute h-100 w-100">
@@ -36,25 +37,25 @@
                     </div>
                     <h5 class="text-white mt-5">Export to:</h5>
                     <button type="button" id="spreadsheet-export" class="btn btn-primary btn-sm" data-target="#exportModal">Google Spreadsheet <i class="fa fa-file-excel-o"></i></button>
+                    <small id="exported-link" class="text-info font-italic">
+                    </small>
                 </form>
             </aside>
         </div>
-        <div class="col-right p-0">
-            <section id="content" class="overflow-auto position-absolute h-100">
-                <table id="tbl-podcasts" class="display table">
-                    <thead class="text-center text-primary">
-                    <tr>
-                        <th scope="col">Show</th>
-                        <th scope="col">Host</th>
-                        <th scope="col">Email</th>
-                        <th scope="col">Description</th>
-                        <th scope="col">Note</th>
-                        <th scope="col"></th>
-                    </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </section>
+        <div id="content" class="col-right p-0 overflow-auto h-100">
+            <table id="tbl-podcasts" class="table w-100">
+                <thead class="text-center text-primary">
+                <tr>
+                    <th scope="col">Show</th>
+                    <th scope="col">Host</th>
+                    <th scope="col">Email</th>
+                    <th scope="col">Description</th>
+                    <th scope="col">Note</th>
+                    <!--<th scope="col"></th>-->
+                </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
             <span class="processing" style="display: none;">
                 <img src="./asset/img/animated/spinner.gif" class="spinner">
             </span>

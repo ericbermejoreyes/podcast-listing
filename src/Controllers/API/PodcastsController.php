@@ -21,9 +21,7 @@ class PodcastsController
             $podcasts[] = $podcast;
         }
 
-        $response = new JsonResponse($podcasts);
-
-        return $response;
+        return new JsonResponse($podcasts);
     }
 
     public function putPodcasts(Request $request)

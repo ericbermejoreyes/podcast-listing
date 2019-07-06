@@ -17,7 +17,7 @@ class Connection
             $host = $host . ':' . $options['port'];
         }
 
-        $this->connection = new \PDO("$driver:host=$host;dbname=$database", $username, $password);
+        $this->connection = new \PDO("$driver:host=$host;dbname=$database;charset=utf8", $username, $password);
         $this->connection->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
     }
 

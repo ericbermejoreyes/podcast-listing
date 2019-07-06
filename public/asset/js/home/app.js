@@ -4,7 +4,9 @@ function initApp() {
         let pageEnd = false;
         let pageLoad = false;
         let spreadsheet = new ApiSpreadsheet();
-        let requestInterval = 1500;
+        let exportInProgress = false;
+        let searchDelay = null;
+        let rowNoRecord = $('<tr>').append($('<td>').attr({colspan: 4, class: 'text-center text-muted'}).text('- No Record -'));
 
         init();
 
@@ -15,7 +17,9 @@ function initApp() {
             //     getGenreApi(genres => {
             //         for (let genre of genres) {
             //             updatePodcastsFromListennotes(genre);
+            //             console.log(genre);
             //         }
+            //         console.log('update done');
             //     });
             // });
 
@@ -44,25 +48,35 @@ function initApp() {
                     }
                 })
                 .on('input', 'form#podcast-listing input.search', function () {
-                    resetTable();
-                    populateTable();
+                    if (searchDelay) {
+                        clearTimeout(searchDelay);
+                    }
+
+                    searchDelay = setTimeout(() => {
+                        resetTable();
+                        populateTable();
+                    }, 500);
                 })
                 .on('click', 'table#tbl-podcasts .star', toggleStarred)
                 .on('dblclick', '.table#tbl-podcasts .note', toggleNote)
                 .ajaxStart(function () {
-                    let loading = $('#content + .processing');
+                    let loading = $('#content .processing');
                     if (loading.is(':visible') == false) {
                         loading.fadeIn('fast');
                     }
                 })
                 .ajaxComplete(function () {
-                    let loading = $('#content + .processing');
+                    let loading = $('#content .processing');
                     if (loading.is(':visible') == true) {
                         loading.fadeOut('fast');
                     }
                 })
                 .on('click', '#spreadsheet-export', spreadsheetExportInit)
-                .on('click', '#btn-export', spreadsheetExport);
+                .on('click', '#btn-export', spreadsheetExport)
+                .on('submit', 'form#podcast-listing', function (e) {
+                    e.preventDefault();
+                    return false;
+                });
 
             $('#content').scroll(function () {
                 // check if scroll reached bottom
@@ -137,7 +151,7 @@ function initApp() {
                 );
 
             let genre = JSON.parse($('form#podcast-listing select#genre-select').val());
-            let search = $('form#podcast-listing input.search').val();
+            let search = $('form#podcast-listing input.search').val().toString().trim();
 
             if (genre) filters.genreId = genre.id;
             if (search) filters.search = search;
@@ -159,6 +173,10 @@ function initApp() {
                             .unhighlight()
                             .highlight(search);
 
+                        if ($('table#tbl-podcasts tbody tr').length <= 1) {
+                            $('table#tbl-podcasts tbody').html(rowNoRecord);
+                        }
+
                         loading.remove();
                     });
                 });
@@ -179,15 +197,15 @@ function initApp() {
                 tr
                     .append($('<td>').html(row.title))
                     .append($('<td>').html(row.host))
-                    .append($('<td>').html(row.email))
+                    .append($('<td>').html('<a href="mailto:' + row.email + '">' + row.email + '</a>'))
                     .append($('<td>').html(row.description))
                     .append($('<td>').addClass('note').html(row.note));
 
-                if (row.starred == true) {
+                /*if (row.starred == true) {
                     tr.append($('<td>').append($('<i>').addClass(['fa', 'fa-star', 'star'])));
                 } else {
                     tr.append($('<td>').append($('<i>').addClass(['fa', 'fa-star-o', 'star'])));
-                }
+                }*/
 
                 table.append(tr);
             }
@@ -301,39 +319,61 @@ function initApp() {
 
         // Begin export to google spreadsheet
         function spreadsheetExport() {
-            let filename = $('#export-modal #spreadsheet-name').val();
+            if (!exportInProgress) {
+                let iconExcel = "fa fa-file-excel-o";
+                let iconLoading = "fa fa-spinner fa-pulse";
 
-            spreadsheet
-                .create(filename)
-                .then(response => {
-                    let spreadsheetId = response.spreadsheetId;
-                    let spreadsheetUrl = response.spreadsheetUrl;
+                exportInProgress = true;
 
-                    getGenreApi(genres => {
-                        createSheetPerGenre(spreadsheetId, genres);
-                    });
-                });
-        }
+                $('#spreadsheet-export')
+                    .attr({disabled: "disabled"})
+                    .find('i')
+                    .attr({class: iconLoading});
 
-        function createSheetPerGenre(spreadsheetId, genres)
-        {
-            if (genres.length > 0) {
-                let genre = genres.shift();
+                let filename = $('#export-modal #spreadsheet-name').val();
 
-                console.log(genres);
+                spreadsheet
+                    .create(filename)
+                    .then(response => {
+                        let spreadsheetId = response.spreadsheetId;
+                        let spreadsheetUrl = response.spreadsheetUrl;
+                        let link = $('<a>').attr({href: spreadsheetUrl, target: '_blank'});
 
-                setTimeout(() => {
-                    spreadsheet
-                        .newSheet(spreadsheetId, genre.name)
-                        .then(sheetProperties => {
-                            let sheet = new Sheet(spreadsheetId, sheetProperties);
-                            populateSheet(sheet, genre.id, () => {
-                                sheet.fixCellSize();
-                                createSheetPerGenre(spreadsheetId, genres);
+                        getGenreApi(genres => {
+                            createSheetPerGenre(spreadsheetId, genres, () => {
+                                exportInProgress = false;
+                                $('#spreadsheet-export')
+                                    .removeAttr('disabled')
+                                    .find('i')
+                                    .attr({class: iconExcel});
+
+                                $('#exported-link').html(link);
                             });
                         });
-                }, requestInterval);
+                    });
             }
+        }
+
+        function createSheetPerGenre(spreadsheetId, genres, callback)
+        {
+            let genre = genres.shift();
+
+            spreadsheet
+                .newSheet(spreadsheetId, genre.name.toString())
+                .then(sheetProperties => {
+                    let sheet = new Sheet(spreadsheetId, sheetProperties);
+                    populateSheet(sheet, genre.id, () => {
+                        sheet
+                            .fixCellSize()
+                            .then(() => {
+                                if (genres.length) {
+                                    createSheetPerGenre(spreadsheetId, genres);
+                                } else {
+                                    if (callback) callback();
+                                }
+                            });
+                    });
+                });
         }
 
         // Populate each sheet with data
@@ -348,15 +388,19 @@ function initApp() {
                 getPodcastApi(filter, podcasts => {
                     if (podcasts.length > 0) {
                         podcasts = podcasts.map(podcast => {
-                            return [podcast.title, podcast.host, podcast.email, podcast.description, podcast.note || ''];
+                            return [podcast.title, podcast.host, podcast.email || 'N/A', podcast.description, podcast.note || ''];
                         });
-                        sheet.update('A' + startIndex + ':E', podcasts);
-                        populateSheet(sheet, genreId, callback, page + 1, startIndex + podcasts.length);
+                        sheet
+                            .update('A' + startIndex + ':E', podcasts)
+                            .then(response => {
+                                response.page = page;
+                                populateSheet(sheet, genreId, callback, page + 1, startIndex + podcasts.length);
+                            });
                     } else {
                         if (callback) callback(sheet);
                     }
                 });
-            }, requestInterval);
+            }, 1000);
         }
     });
 }

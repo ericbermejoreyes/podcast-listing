@@ -6,7 +6,7 @@ form#podcast-listing {
     margin-bottom: 0px;
 }
 
-table#tbl-podcasts tbody{
+table#tbl-podcasts tbody *{
     font-size: 14px;
 }
 
@@ -19,7 +19,11 @@ table#tbl-podcasts .fa {
     color: #95999c;
 }
 
-table#tbl-podcasts tr td:nth-last-child(2) {
+table#tbl-podcasts tr td:not(:nth-last-child(2)){
+    min-width: 200px;
+}
+
+table#tbl-podcasts tr td:last-child {
     min-width: 500px;
 }
 
@@ -54,11 +58,11 @@ table#tbl-podcasts tr td:nth-last-child(2) {
 }
 
 .col-left {
-    width: 350px;
+    width: 300px;
     float:left;
 }
 
 .col-right {
-    width: calc(100% - 350px);
+    width: calc(100% - 300px);
     float: left;
 }

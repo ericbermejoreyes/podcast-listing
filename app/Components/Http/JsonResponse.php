@@ -16,7 +16,7 @@ class JsonResponse extends Response
 
     public function setContent($content)
     {
-        $this->content = json_encode($content);
+        $this->content = (json_encode($content) !== false) ? json_encode($content) : '';
 
         return $this;
     }

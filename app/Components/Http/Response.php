@@ -18,7 +18,7 @@ class Response
         if ($content !== null) {
             $this->setContent($content);
         }
-        $this->headers = new DataCollection(["Content-Type", "text/plain"]);
+        $this->headers = new DataCollection(["Content-Type" => "text/html"]);
     }
 
     public function setContent($content)
