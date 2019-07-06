@@ -9,16 +9,11 @@
     },
 
     "google": {
-        "clientId": "1016115252875-8cua8u739t260q2j5n3n5m679usup6go.apps.googleusercontent.com",
-        "apikey": "AIzaSyDBaeq5aeWtOsoteK3TDmGBJrIpCk3ZEsY"
+        "clientId": "",
+        "apikey": ""
     },
 
     "listennotes": {
-        "apikey": "988e6285bcf64a9aa17d1d421d0df70b"
-    },
-
-    "security": {
-        "path": "/",
-        "login": "/login"
+        "apikey": ""
     }
 }
