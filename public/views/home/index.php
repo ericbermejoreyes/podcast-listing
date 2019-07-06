@@ -26,7 +26,7 @@
                             <div class="input-group-text">Genre</div>
                         </div>
                         <select id="genre-select" name="genreId" class="form-control">
-                            <option id="genre_all" value="null">All</option>
+                            <option id="genre_all" value="null">- Select All -</option>
                         </select>
                     </div>
                     <div class="input-group input-group-sm mt-2">
@@ -35,8 +35,9 @@
                         </div>
                         <input name="search" type="search" class="search form-control" placeholder="keyword">
                     </div>
+                    <button type="button" id="btn-update-records" class="btn btn-primary btn-sm mt-2"><span>Update List</span> <i class="fa fa-refresh"></i></button>
                     <h5 class="text-white mt-5">Export to:</h5>
-                    <button type="button" id="spreadsheet-export" class="btn btn-primary btn-sm" data-target="#exportModal">Google Spreadsheet <i class="fa fa-file-excel-o"></i></button>
+                    <button type="button" id="btn-spreadsheet-export" class="btn btn-primary btn-sm" data-target="#exportModal">Google Spreadsheet <i class="fa fa-file-excel-o"></i></button>
                     <small id="exported-link" class="text-info font-italic">
                     </small>
                 </form>

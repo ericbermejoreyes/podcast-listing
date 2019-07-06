@@ -12,31 +12,7 @@ function initApp() {
 
         // initialize all necessary codes
         function init() {
-            // update the whole database
-            // updateGenresFromListennotes(() => {
-            //     getGenreApi(genres => {
-            //         for (let genre of genres) {
-            //             updatePodcastsFromListennotes(genre);
-            //             console.log(genre);
-            //         }
-            //         console.log('update done');
-            //     });
-            // });
-
-            //load genres into select
-            getGenreApi(genres => {
-                for (let genre of genres) {
-                    let option = $('<option>').attr({id: 'genre_' + genre.id});
-
-                    option
-                        .val(JSON.stringify({id: genre.id, tokenId: genre.tokenId}))
-                        .text(genre.name);
-
-                    $('select#genre-select').append(option);
-                }
-
-                populateTable();
-            });
+            refreshGenreList();
 
             // set events here
             $(document)
@@ -71,7 +47,8 @@ function initApp() {
                         loading.fadeOut('fast');
                     }
                 })
-                .on('click', '#spreadsheet-export', spreadsheetExportInit)
+                .on('click', '#btn-spreadsheet-export', spreadsheetExportInit)
+                .on('click', '#btn-update-records', updateRecords)
                 .on('click', '#btn-export', spreadsheetExport)
                 .on('submit', 'form#podcast-listing', function (e) {
                     e.preventDefault();
@@ -85,6 +62,68 @@ function initApp() {
                     populateTable(page);
                 }
             });
+        }
+
+        function refreshGenreList() {
+            //load genres into select
+            getGenreApi(genres => {
+                for (let genre of genres) {
+                    if ($('select#genre-select option#genre_' + genre.id).length === 0) {
+                        let option = $('<option>')
+                            .attr({id: 'genre_' + genre.id})
+                            .val(JSON.stringify({id: genre.id, tokenId: genre.tokenId}))
+                            .text(genre.name);
+
+                        $('select#genre-select').append(option);
+                    }
+                }
+
+                var options = $('select#genre-select option');
+
+                options.detach().sort(function(a, b) {
+                    var at = $(a).text();
+                    var bt = $(b).text();
+                    return (at > bt) ? 1 : ((at < bt) ? -1 : 0);
+                });
+
+                $('select#genre-select').html(options);
+
+                resetTable();
+                populateTable();
+            });
+        }
+
+        function updateRecords() {
+            // update the whole database
+            $(this)
+                .attr({disabled: 'disabled'})
+                .find('span').text('Updating')
+                .next('i.fa').addClass('fa-spin');
+
+            updateGenresFromListennotes(() => {
+                getGenreApi(genres => {
+                    genreLoop(genres, function () {
+                        $('#btn-update-records')
+                            .removeAttr('disabled')
+                            .find('span').text('Update List')
+                            .next('i.fa').removeClass('fa-spin');
+
+                        refreshGenreList();
+                    })();
+                });
+
+            });
+        }
+
+        function genreLoop(genres, callback)
+        {
+            if (genres.length) {
+                return function () {
+                    updatePodcastsFromListennotes(genres.shift(), genreLoop(genres, callback));
+                };
+            } else {
+                if (callback) callback();
+            }
         }
 
         function toggleNote() {
@@ -174,7 +213,10 @@ function initApp() {
                             .highlight(search);
 
                         if ($('table#tbl-podcasts tbody tr').length <= 1) {
+                            $('#btn-spreadsheet-export').attr({disabled: 'disabled'});
                             $('table#tbl-podcasts tbody').html(rowNoRecord);
+                        } else {
+                            if (exportInProgress === false) $('#btn-spreadsheet-export').removeAttr('disabled');
                         }
 
                         loading.remove();
@@ -244,7 +286,7 @@ function initApp() {
             });
         }
 
-        function updatePodcastsFromListennotes(genre, page = 1) {
+        function updatePodcastsFromListennotes(genre, callback, page = 1) {
             lapi.getPodcastsByGenre({
                 genre_id: genre.tokenId,
                 region: 'us',
@@ -263,7 +305,9 @@ function initApp() {
 
                 updatePodcastsApi(podcasts, () => {
                     if (response.has_next) {
-                        updatePodcastsFromListennotes(genre, page + 1);
+                        updatePodcastsFromListennotes(genre, callback, page + 1);
+                    } else {
+                        if (callback) callback();
                     }
                 });
             });
@@ -325,7 +369,7 @@ function initApp() {
 
                 exportInProgress = true;
 
-                $('#spreadsheet-export')
+                $('#btn-spreadsheet-export')
                     .attr({disabled: "disabled"})
                     .find('i')
                     .attr({class: iconLoading});
@@ -342,7 +386,7 @@ function initApp() {
                         getGenreApi(genres => {
                             createSheetPerGenre(spreadsheetId, genres, () => {
                                 exportInProgress = false;
-                                $('#spreadsheet-export')
+                                $('#btn-spreadsheet-export')
                                     .removeAttr('disabled')
                                     .find('i')
                                     .attr({class: iconExcel});
